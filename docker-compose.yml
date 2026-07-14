@@ -1,0 +1,2 @@
+version: '3.9'
+# TODO: add spark, postgres, minio services

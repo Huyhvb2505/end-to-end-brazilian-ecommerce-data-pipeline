@@ -1,0 +1,5 @@
+pyspark
+pandas
+minio
+psycopg2-binary
+jupyter
