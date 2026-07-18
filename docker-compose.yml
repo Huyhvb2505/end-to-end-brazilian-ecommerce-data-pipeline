@@ -122,7 +122,7 @@ services:
       - JUPYTER_TOKEN=${JUPYTER_TOKEN}
     volumes:
       - ./notebooks:/home/jovyan/work/notebooks
-      - ./raw:/home/jovyan/work/raw
+      - ./data/raw:/home/jovyan/work/data/raw/
       - ./scripts:/home/jovyan/work/scripts
     networks:
       - spark-network
