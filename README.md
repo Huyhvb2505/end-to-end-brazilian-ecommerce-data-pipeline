@@ -1,6 +1,8 @@
-# 🚀 Brazilian_ecommerce Data Pipeline 
+# 🚀 Brazilian E-Commerce End-to-End Data Pipeline (Medallion Architecture)
 
-Pipeline tự động hóa xử lý dữ liệu thương mại điện tử từ nguồn thô, làm sạch, và tải lên kho dữ liệu phục vụ báo cáo.
+An end-to-end, production-style Batch ELT Data Engineering Pipeline built on the Brazilian E-Commerce Public Dataset by Olist (100,000+ orders across 9 normalized OLTP tables).
+
+This project implements the Medallion Architecture (Bronze → Silver → Gold) using Python, Apache Airflow, MinIO (S3-Compatible Object Storage), PostgreSQL, dbt Core, Docker, and Power BI to transform raw transactional records into an analytics-ready Star Schema Data Warehouse and executive BI dashboards.
 
 ---
 
@@ -29,21 +31,40 @@ Pipeline tự động hóa xử lý dữ liệu thương mại điện tử từ
 * **Dead-Letter Queue (DLQ):** Tự động cách ly các bản ghi lỗi định dạng để xử lý sau mà không làm sập toàn bộ luồng.
 * **Schema Validation:** Kiểm tra tính hợp lệ của kiểu dữ liệu đầu vào bằng Pydantic/Pandas trước khi lưu trữ.
 
-## 🛠️ Công nghệ sử dụng
-* **Language:** Python 3.10+
-* **Orchestration:** Apache Airflow / Python Script
-* **Database:** PostgreSQL
-* **Storage:** MinIO (Object Storage)
+## 🛠️ Tech stack
+* **Data Lake Storage:** MinIO + Apache Parquet
+* **Orchestration:** Apache Airflow 
+* **Data Warehouse:** PostgreSQL
+* **Data Transformation:** dbt Core
+* **Business Intelligence:** Microsoft Power BI
 * **Containerization:** Docker & Docker Compose
 
 ## 📁 Cấu trúc thư mục
-```text
-├── config/             # Tệp cấu hình kết nối, biến môi trường
-├── data/               # Thư mục chứa dữ liệu thô / đầu ra tạm thời
-├── src/                # Mã nguồn chính
-│   ├── extract.py      # Thu thập dữ liệu
-│   ├── transform.py    # Làm sạch và chuẩn hóa dữ liệu
-│   └── load.py         # Nạp dữ liệu vào Database
-├── docker-compose.yml  # Cấu hình dịch vụ Docker
-├── requirements.txt    # Danh sách thư viện Python
+
+├── config/
+│   └── settings.py                   # Centralized MinIO (boto3) & PostgreSQL (SQLAlchemy) connection configs
+├── data/
+│   └── raw/                          # Raw Olist CSV files downloaded from Kaggle
+├── scripts/
+│   └── ingestion/
+│       ├── upload_to_minio.py        # Step 1: Converts raw CSVs to Parquet and uploads to MinIO (Bronze)
+│       └── load_minio_to_postgres.py # Step 2: Reads Parquet from MinIO and loads into Postgres `raw` schema
+├── sql/
+│   └── init_postgres.sql             # Initializes database schemas: `raw`, `silver_dwh`, `gold_mart`
+├── olist_dbt/                        # Step 3: dbt Core project for Silver & Gold transformations
+│   ├── dbt_project.yml
+│   ├── snapshots/                    # SCD Type 2 snapshots (scd_customers.sql, scd_sellers.sql)
+│   └── models/
+│       ├── staging/                  # Source definitions and light column casting
+│       ├── silver_dwh/               # Star Schema models (fact_order_items.sql, dim_*.sql, schema.yml)
+│       └── gold_mart/                # Business Data Marts (mart_daily_sales.sql, mart_delivery_sla.sql,               mart_customer_rfm.sql)
+├── dags/
+│   └── olist_medallion_dag.py        # Step 4: Apache Airflow DAG orchestrating the end-to-end workflow
+├── dashboard/
+│   └── olist_executive_report.pbix   # Step 5: Power BI dashboard connected to `gold_mart`
+├── docs/
+│   └── images/                       # Architecture diagrams, Airflow DAG runs, EXPLAIN ANALYZE & BI screenshots
+├── .env.example                      # Template for environment variables
+├── docker-compose.yml                # Multi-container setup (PostgreSQL, MinIO, Apache Airflow)
+├── requirements.txt                  # Python dependencies (boto3, pandas, pyarrow, sqlalchemy, dbt-postgres)
 └── README.md
