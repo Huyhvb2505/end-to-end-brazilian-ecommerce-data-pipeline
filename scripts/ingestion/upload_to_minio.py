@@ -13,6 +13,7 @@ def upload_data_to_minio():
 
     bucket_name = "raw-data"
     object_name = "./data/raw/"
+    
     try:
         # check bucket có tồn tại ko nếu ko thì tạo 
         if not minio_client.bucket_exists(bucket_name):
