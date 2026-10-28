@@ -64,6 +64,7 @@ This project implements the Medallion Architecture (Bronze → Silver → Gold) 
 │   └── olist_executive_report.pbix   # Step 5: Power BI dashboard connected to `gold_mart`
 ├── docs/
 │   └── images/                       # Architecture diagrams, Airflow DAG runs, EXPLAIN ANALYZE & BI screenshots
+├── logs/                             # This directory contains the full history of Airflow logs. 
 ├── .env.example                      # Template for environment variables
 ├── docker-compose.yml                # Multi-container setup (PostgreSQL, MinIO, Apache Airflow)
 ├── requirements.txt                  # Python dependencies (boto3, pandas, pyarrow, sqlalchemy, dbt-postgres)

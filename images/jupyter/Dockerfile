@@ -1,0 +1,16 @@
+FROM jupyter/pyspark-notebook:spark-3.5.0
+
+USER root
+
+# Cài đặt postgresql-client để hỗ trợ debug DW trực tiếp nếu cần
+RUN apt-get update && \
+    apt-get install -y postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+USER ${NB_UID}
+
+# Sao chép và cài đặt các thư viện Python chuyên cho DE
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /home/jovyan/work

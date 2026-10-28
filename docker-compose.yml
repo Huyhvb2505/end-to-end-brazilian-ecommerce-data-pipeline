@@ -1,67 +1,28 @@
+version: '3.8'
+
+x-airflow-common:
+  &airflow-common
+  build:
+    context: .
+    dockerfile: images/airflow/Dockerfile   
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-dw:5432/${AIRFLOW_DB_NAME}
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__LOGGING_LEVEL: 'INFO'
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs     # Logs folder by airflow
+    - ./scripts:/opt/airflow/scripts
+    - ./olist_dbt:/opt/airflow/olist_dbt
+  user: "${AIRFLOW_UID:-50000}:0"
+  depends_on:
+    postgres-dw:
+      condition: service_healthy
+
 services:
-  # --- SPARK MASTER ---
-  spark-master:
-    image: ${SPARK_IMAGE}
-    container_name: spark-master
-    environment:
-      - SPARK_MODE=master
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
-      - SPARK_MASTER_WEBUI_PORT=8080
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-    volumes:
-      - ./notebooks:/opt/spark-notebooks
-    networks:
-      - spark-network
-
-  # --- SPARK WORKER 1 ---
-  spark-worker-1:
-    image: ${SPARK_IMAGE}
-    container_name: spark-worker-1
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
-      - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
-    ports:
-      - "8081:8081"
-    volumes:
-      - ./notebooks:/opt/spark-notebooks
-    networks:
-      - spark-network
-    depends_on:
-      - spark-master
-
-  # --- SPARK WORKER 2 ---
-  spark-worker-2:
-    image: ${SPARK_IMAGE}
-    container_name: spark-worker-2
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_CORES=${SPARK_WORKER_CORES}
-      - SPARK_WORKER_MEMORY=${SPARK_WORKER_MEMORY}
-      - SPARK_RPC_AUTHENTICATION_ENABLED=no
-      - SPARK_RPC_ENCRYPTION_ENABLED=no
-      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-      - SPARK_SSL_ENABLED=no
-    ports:
-      - "8082:8082"
-    volumes:
-      - ./notebooks:/opt/spark-notebooks
-    networks:
-      - spark-network
-    depends_on:
-      - spark-master
-
   # --- MINIO OBJECT STORAGE ---
   minio:
     image: minio/minio:RELEASE.2024-01-28T22-35-53Z
@@ -75,8 +36,7 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    networks:
-      - spark-network
+    
 
   # --- MINIO CLIENT (Tự động hóa tạo Bucket) ---
   minio-client:
@@ -92,29 +52,76 @@ services:
       /usr/bin/mc mb myminio/${BUCKET_MODELS} || true;
       exit 0;
       "
-    networks:
-      - spark-network
+    
 
   # --- POSTGRES DATA WAREHOUSE ---
+  # 1. PostgreSQL (Metadata + Data Warehouse)
   postgres-dw:
     image: postgres:16-alpine
     container_name: postgres-dw
-    ports:
-      - "${POSTGRES_PORT}:5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_MULTIPLE_DATABASES: ${AIRFLOW_DB_NAME},${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - spark-network
+      - ./scripts/init-multiple-db.sh:/docker-entrypoint-initdb.d/init-multiple-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  #  Airflow Init 
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD}
+
+  #  Airflow Webserver 
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  #  Airflow Scheduler 
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
 
   # --- JUPYTER LAB (MÔI TRƯỜNG DEV) ---
   jupyter:
     build:
       context: .
-      dockerfile: Dockerfile.jupyter
+      dockerfile: images/jupyter/Dockerfile
     container_name: jupyter-lab
     ports:
       - "${JUPYTER_PORT}:8888"
@@ -124,16 +131,12 @@ services:
       - ./notebooks:/home/jovyan/work/notebooks
       - ./data/raw:/home/jovyan/work/data/raw/
       - ./scripts:/home/jovyan/work/scripts
-    networks:
-      - spark-network
     depends_on:
-      - spark-master
       - minio
       - postgres-dw
+  
 
-networks:
-  spark-network:
-    driver: bridge
+
 
 volumes:
   minio_data:
