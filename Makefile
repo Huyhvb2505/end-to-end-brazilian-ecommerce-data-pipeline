@@ -19,6 +19,14 @@ logs:
 # Khởi động lại toàn bộ hệ thống
 restart: down up
 
+# Dừng các service đang chạy
+stop:
+	docker compose stop
+
+# Khởi động lại các service đã dừng
+start:
+	docker compose start
+
 # Kiểm tra trạng thái các container đang chạy
 ps:
 	docker compose ps
