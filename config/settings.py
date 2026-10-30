@@ -9,8 +9,8 @@ load_dotenv(BASE_DIR / ".env")
 class Settings:
     # --- Directory Structure ---
     BASE_DIR = BASE_DIR
-    #RAW_DATA_DIR = BASE_DIR / "data" / "raw"
-    #TEMP_DIR = BASE_DIR / "data" / "temp_parquet"
+    RAW_DATA_DIR = BASE_DIR / "data" / "raw"
+    TEMP_DIR = BASE_DIR / "data" / "temp_parquet"
 
     # --- JUPYTER CONFIG ---
     JUPYTER_PORT = int(os.getenv("JUPYTER_PORT", 8888))
@@ -51,18 +51,18 @@ class Settings:
     AIRFLOW_USER = os.getenv("_AIRFLOW_WWW_USER_USERNAME", "admin")
     AIRFLOW_PASSWORD = os.getenv("_AIRFLOW_WWW_USER_PASSWORD", "admin")
 
-    # # --- OLIST TABLES (Danh sách các bảng dataset gốc) ---
-    # OLIST_TABLES = [
-    #     "olist_customers_dataset",
-    #     "olist_geolocation_dataset",
-    #     "olist_order_items_dataset",
-    #     "olist_order_payments_dataset",
-    #     "olist_order_reviews_dataset",
-    #     "olist_orders_dataset",
-    #     "olist_products_dataset",
-    #     "olist_sellers_dataset",
-    #     "product_category_name_translation"
-    # ]
+    # --- OLIST TABLES (Danh sách các bảng dataset gốc) ---
+    OLIST_TABLES = [
+        "olist_customers_dataset",
+        "olist_geolocation_dataset",
+        "olist_order_items_dataset",
+        "olist_order_payments_dataset",
+        "olist_order_reviews_dataset",
+        "olist_orders_dataset",
+        "olist_products_dataset",
+        "olist_sellers_dataset",
+        "product_category_name_translation"
+    ]
 
 # Initialize settings
 settings = Settings()
