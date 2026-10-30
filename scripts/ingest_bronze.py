@@ -51,6 +51,7 @@ def run_bronze_pipeline():
 
         # --- BƯỚC 1: Đọc CSV -> Chuyển sang Parquet ---
         df = pd.read_csv(csv_path)
+        Path(parquet_path).parent.mkdir(parents=True, exist_ok=True)
         df.to_parquet(parquet_path)
 
         # --- BƯỚC 2: Upload into MinIO ---
@@ -61,7 +62,7 @@ def run_bronze_pipeline():
         # --- BƯỚC 3: Load vào PostgreSQL (schema raw) ---
         df.to_sql(name=table_name, 
                   con=engine, schema="raw", 
-                  if_exists="replace", 
+                  if_exists="replace",  # replace the table if it exists. Not duplicate data
                   index=False,
                   chunksize=50000)  # split into chunks of 50,000 rows
         print(f"   -> Loaded to Postgres table: [raw].[{table_name}]")
