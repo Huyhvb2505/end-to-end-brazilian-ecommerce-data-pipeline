@@ -43,8 +43,10 @@ This project implements the Medallion Architecture (Bronze → Silver → Gold) 
 
 ├── config/
 │   └── settings.py                   # Centralized MinIO (boto3) & PostgreSQL (SQLAlchemy) connection configs
+    └── logger.py                     #
 ├── data/
 │   └── raw/                          # Raw Olist CSV files downloaded from Kaggle
+    └── temp_parquet/                 # 
 ├── scripts/
 │   └── ingestion/
 │       ├── upload_to_minio.py        # Step 1: Converts raw CSVs to Parquet and uploads to MinIO (Bronze)
@@ -65,6 +67,7 @@ This project implements the Medallion Architecture (Bronze → Silver → Gold) 
 ├── docs/
 │   └── images/                       # Architecture diagrams, Airflow DAG runs, EXPLAIN ANALYZE & BI screenshots
 ├── logs/                             # This directory contains the full history of Airflow logs. 
+     └── pipeline.log                 #  
 ├── .env.example                      # Template for environment variables
 ├── docker-compose.yml                # Multi-container setup (PostgreSQL, MinIO, Apache Airflow)
 ├── requirements.txt                  # Python dependencies (boto3, pandas, pyarrow, sqlalchemy, dbt-postgres)
@@ -85,3 +88,8 @@ This project implements the Medallion Architecture (Bronze → Silver → Gold) 
      PostgreSQL (schema raw): Đóng vai trò là Staging Area phục vụ cho việc kết nối trực tiếp bằng SQL hoặc các công cụ chuyển đổi tiếp theo.
 
      read csv and force all column into string data type(tránh làm mất data) sử dụng dtype=str( ép các cột đều là kiểu text)
+
+
+
+     2. monitor (logging):
+     

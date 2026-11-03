@@ -5,10 +5,13 @@ import pandas as pd
 from  config.settings import settings
 from minio import Minio
 from sqlalchemy import create_engine # interact with postgreSQL
+from config.logger import get_logger
+
+logger = get_logger("ingest_bronze")
 
 # create bronze func -> transform csv file to parquet + push minio + load to postgres
 def run_bronze_pipeline():
-    print("🚀 Starting Bronze Layer pipeline...")
+    logger.info("🚀 Starting Bronze Layer pipeline...")
     
     # 1.initial Minio client
     #  settings.MINIO_ENDPOINT, settings.MINIO_ROOT_USER, settings.MINIO_ROOT_PASSWORD
@@ -24,8 +27,8 @@ def run_bronze_pipeline():
 
     if not minio_client.bucket_exists(settings.BUCKET_RAW):
         minio_client.make_bucket(settings.BUCKET_RAW)
-        print(f"✅ Created MinIO Bucket: {settings.BUCKET_RAW}")
-        
+        logger.info(f"✅ Created MinIO Bucket: {settings.BUCKET_RAW}")
+
     # ==================postgres======================
     # 2. initial postgres engine  
     # TODO: create engine with settings.POSTGRES_CONN_STR
@@ -34,7 +37,7 @@ def run_bronze_pipeline():
     # Đảm bảo schema 'raw' đã tồn tại trong Postgres
     with engine.begin() as conn:
         conn.execute("CREATE SCHEMA IF NOT EXISTS raw;")
-    print("✅ Created schema 'raw' in PostgreSQL.")
+    logger.info("✅ Created schema 'raw' in PostgreSQL.")
 
     # 3. loop through each Olist table
     for table_name in settings.OLIST_TABLES:
@@ -42,13 +45,13 @@ def run_bronze_pipeline():
         csv_path = settings.RAW_DATA_DIR / file_name
         
         if not csv_path.exists():
-            print(f"⚠️ Warning: File doesn’t exist: {file_name}.")
+            logger.warning(f"⚠️ Warning: File doesn’t exist: {file_name}.")
             continue
 
         parquet_filename = f"{table_name}.parquet"
         parquet_path = settings.TEMP_DIR / parquet_filename
 
-        print(f"\n🔄 Processing table: {table_name}")
+        logger.info(f"🔄 Processing table: {table_name}")
 
         # --- step 1: read csv and force all column into string data type(tránh làm mất data)
         df = pd.read_csv(csv_path, dtype=str)
@@ -60,19 +63,19 @@ def run_bronze_pipeline():
         # --- step 3: Upload into MinIO ---
         df.to_parquet(parquet_path, index=False) # index column loại bỏ index column mặc định khi pd csv->parquet
         minio_client.fput_object(settings.BUCKET_RAW, parquet_filename, str(parquet_path))
-        
-        print(f"   -> Uploaded to MinIO: {settings.BUCKET_RAW}/{parquet_filename}")
-        
-        
+
+        logger.info(f"   -> Uploaded to MinIO: {settings.BUCKET_RAW}/{parquet_filename}")
+
+
         # --- step 4: Load vào PostgreSQL (schema raw) ---
         df.to_sql(name=table_name, 
                   con=engine, schema="raw", 
                   if_exists="replace",  # replace the table if it exists. Not duplicate data
                   index=False,
                   chunksize=50000)  # split into chunks of 50,000 rows
-        print(f"   -> Loaded to Postgres table: [raw].[{table_name}]")
+        logger.info(f"   -> Loaded to Postgres table: [raw].[{table_name}]")
 
-    print("\n🎉 Successfully completed Bronze Layer pipeline!")
-    
+    logger.info("🎉 Successfully completed Bronze Layer pipeline!")
+
 if __name__ == "__main__":
     run_bronze_pipeline()
