@@ -69,3 +69,19 @@ This project implements the Medallion Architecture (Bronze → Silver → Gold) 
 ├── docker-compose.yml                # Multi-container setup (PostgreSQL, MinIO, Apache Airflow)
 ├── requirements.txt                  # Python dependencies (boto3, pandas, pyarrow, sqlalchemy, dbt-postgres)
 └── README.md
+
+
+
+# Notes:
+     1. Bronze layer
+     Đảm bảo tính lặp lại & An toàn hệ thống (Idempotency):
+
+     Cấu hình cơ chế ghi đè toàn bộ (if_exists="replace" trên PostgreSQL và overwrite object trên MinIO) giúp pipeline đạt tính Idempotent — cho phép chạy lại script nhiều lần mà không lo bị sinh ra dữ liệu trùng lặp (duplicate data).
+
+     Bổ sung cột metadata hệ thống _ingested_at gắn kèm thời điểm chính xác pipeline thực hiện nạp dữ liệu, hỗ trợ hiệu quả cho việc theo dõi, kiểm toán (audit) và debug lỗi sau này.
+
+     MinIO (Parquet Format): Đóng vai trò là Single Source of Truth (Nguồn sự thật tối cao). Dữ liệu thô từ CSV được chuyển đổi sang định dạng cột tối ưu Parquet và đẩy lên MinIO giúp tiết kiệm không gian lưu trữ và tăng tốc độ đọc cho các tầng sau.
+
+     PostgreSQL (schema raw): Đóng vai trò là Staging Area phục vụ cho việc kết nối trực tiếp bằng SQL hoặc các công cụ chuyển đổi tiếp theo.
+
+     read csv and force all column into string data type(tránh làm mất data) sử dụng dtype=str( ép các cột đều là kiểu text)

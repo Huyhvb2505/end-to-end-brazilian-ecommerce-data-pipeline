@@ -1,4 +1,5 @@
 import os
+import datetime
 from pathlib import Path
 import pandas as pd
 from  config.settings import settings
@@ -49,17 +50,21 @@ def run_bronze_pipeline():
 
         print(f"\n🔄 Processing table: {table_name}")
 
-        # --- BƯỚC 1: Đọc CSV -> Chuyển sang Parquet ---
-        df = pd.read_csv(csv_path)
+        # --- step 1: read csv and force all column into string data type(tránh làm mất data)
+        df = pd.read_csv(csv_path, dtype=str)
         Path(parquet_path).parent.mkdir(parents=True, exist_ok=True)
-        df.to_parquet(parquet_path)
 
-        # --- BƯỚC 2: Upload into MinIO ---
+        # ---- step 2: add _ingested_at column
+        df['_ingested_at'] = datetime.datetime.now()
+
+        # --- step 3: Upload into MinIO ---
+        df.to_parquet(parquet_path, index=False) # index column loại bỏ index column mặc định khi pd csv->parquet
         minio_client.fput_object(settings.BUCKET_RAW, parquet_filename, str(parquet_path))
+        
         print(f"   -> Uploaded to MinIO: {settings.BUCKET_RAW}/{parquet_filename}")
         
         
-        # --- BƯỚC 3: Load vào PostgreSQL (schema raw) ---
+        # --- step 4: Load vào PostgreSQL (schema raw) ---
         df.to_sql(name=table_name, 
                   con=engine, schema="raw", 
                   if_exists="replace",  # replace the table if it exists. Not duplicate data
