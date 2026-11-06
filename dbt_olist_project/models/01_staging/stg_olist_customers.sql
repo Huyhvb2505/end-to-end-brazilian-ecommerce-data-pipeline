@@ -4,11 +4,12 @@ with source as (
 
 renamed as (
     select
-        customer_id as id,
-        customer_unique_id as unique_id,
-        customer_zip_code_prefix as zip_code_prefix,
-        customer_city as city,
-        customer_state as state
+        customer_id,
+        customer_unique_id,
+        lpad(customer_zip_code_prefix::text, 5, '0') as customer_zip_code_prefix,
+        initcap(trim(customer_city)) as customer_city,
+        upper(trim(customer_state)) as customer_state,
+        _ingested_at
     from source
 )
 
