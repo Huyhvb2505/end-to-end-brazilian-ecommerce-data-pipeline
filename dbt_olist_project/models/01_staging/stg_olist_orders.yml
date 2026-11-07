@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_olist_orders
+    description: "Tầng Silver (Staging) - Chứa thông tin tổng quan, trạng thái và các mốc thời gian vòng đời của đơn hàng."
+    columns:
+      - name: order_id
+        data_type: text
+        description: "Mã định danh duy nhất của đơn hàng (Khóa chính của bảng)."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        data_type: text
+        description: "Mã định danh khách hàng đặt đơn (Khóa ngoại trỏ sang bảng customers)."
+        tests:
+          - not_null
+
+      - name: order_status
+        data_type: text
+        description: "Trạng thái hiện tại của đơn hàng (Ví dụ: delivered, shipped, canceled, processing)."
+        tests:
+          - not_null
+          
+
+      - name: order_purchase_timestamp
+        data_type: timestamp with time zone
+        description: "Thời điểm khách hàng bấm đặt mua đơn hàng."
+        tests:
+          - not_null
+
+      - name: order_approved_at
+        data_type: timestamp with time zone
+        description: "Thời điểm hệ thống/thanh toán xác nhận duyệt đơn."
+
+      - name: order_delivered_carrier_date
+        data_type: timestamp with time zone
+        description: "Thời điểm đơn hàng được bàn giao cho đơn vị vận chuyển."
+
+      - name: order_delivered_customer_date
+        data_type: timestamp with time zone
+        description: "Thời điểm thực tế đơn hàng được giao đến tay khách hàng."
+
+      - name: order_estimated_delivery_date
+        data_type: timestamp with time zone
+        description: "Thời gian dự kiến giao hàng ban đầu báo cho khách."
+        tests:
+          - not_null
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."

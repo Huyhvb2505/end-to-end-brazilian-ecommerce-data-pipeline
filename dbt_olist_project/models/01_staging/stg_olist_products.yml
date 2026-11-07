@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: stg_olist_products
+    description: "Tầng Silver (Staging) - Thông tin chi tiết về sản phẩm, kích thước, trọng lượng và tên danh mục gốc."
+    columns:
+      - name: product_id
+        data_type: text
+        description: "Mã định danh duy nhất của sản phẩm (Khóa chính của bảng)."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_category_name
+        data_type: text
+        description: "Tên phân loại sản phẩm (bằng tiếng Bồ Đào Nha gốc từ Olist)."
+
+      - name: product_name_length
+        data_type: integer
+        description: "Độ dài ký tự của tên sản phẩm."
+        tests:
+          - expression_is_true:
+              expression: "product_name_length >= 0 or product_name_length is null"
+
+      - name: product_description_length
+        data_type: integer
+        description: "Độ dài ký tự của phần mô tả sản phẩm."
+        tests:
+          - expression_is_true:
+              expression: "product_description_length >= 0 or product_description_length is null"
+
+      - name: product_photos_qty
+        data_type: integer
+        description: "Số lượng hình ảnh sản phẩm được đăng tải."
+        tests:
+          - expression_is_true:
+              expression: "product_photos_qty >= 0 or product_photos_qty is null"
+
+      - name: product_weight_g
+        data_type: numeric
+        description: "Trọng lượng sản phẩm tính bằng gram (g)."
+        tests:
+          - expression_is_true:
+              expression: "product_weight_g >= 0 or product_weight_g is null"
+
+      - name: product_length_cm
+        data_type: numeric
+        description: "Chiều dài sản phẩm tính bằng centimet (cm)."
+        tests:
+          - expression_is_true:
+              expression: "product_length_cm >= 0 or product_length_cm is null"
+
+      - name: product_height_cm
+        data_type: numeric
+        description: "Chiều cao sản phẩm tính bằng centimet (cm)."
+        tests:
+          - expression_is_true:
+              expression: "product_height_cm >= 0 or product_height_cm is null"
+
+      - name: product_width_cm
+        data_type: numeric
+        description: "Chiều rộng sản phẩm tính bằng centimet (cm)."
+        tests:
+          - expression_is_true:
+              expression: "product_width_cm >= 0 or product_width_cm is null"
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."

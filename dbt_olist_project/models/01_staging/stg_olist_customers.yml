@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_olist_customers
+    description: "Tầng Silver (Staging) - Làm sạch và chuẩn hóa thông tin khách hàng từ Olist dataset."
+    columns:
+      - name: customer_id
+        data_type: text
+        description: "Khóa chính của bảng (Mã định danh duy nhất cho mỗi đơn hàng/giao dịch của khách hàng)."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_unique_id
+        data_type: text
+        description: "Mã định danh thực tế của khách hàng (Dùng để tracking khách hàng quay lại mua nhiều lần)."
+        tests:
+          - not_null
+
+      - name: customer_zip_code_prefix
+        data_type: text
+        description: "Mã bưu điện (5 chữ số đầu) nơi khách hàng đặt giao hàng."
+        tests:
+          - not_null
+
+      - name: customer_city
+        data_type: text
+        description: "Tên thành phố của khách hàng (Đã được chuẩn hóa viết hoa/thường)."
+
+      - name: customer_state
+        data_type: text
+        description: "Mã bang của Brazil (Ví dụ: SP, RJ, MG)."
+        tests:
+          - not_null
+          
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào hệ thống Bronze layer."

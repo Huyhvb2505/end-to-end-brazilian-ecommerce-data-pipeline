@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_olist_order_reviews
+    description: "Tầng Silver (Staging) - Thông tin đánh giá, điểm số (1-5 sao) và bình luận phản hồi của khách hàng về đơn hàng."
+    columns:
+      - name: review_id
+        data_type: text
+        description: "Mã định danh duy nhất của bản đánh giá (Khóa chính của bảng)."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        data_type: text
+        description: "Mã định danh đơn hàng mà khách hàng đang đánh giá (Khóa ngoại trỏ sang bảng orders)."
+        tests:
+          - not_null
+
+      - name: review_score
+        data_type: integer
+        description: "Điểm số đánh giá của khách hàng, dao động từ 1 (tệ nhất) đến 5 (tốt nhất)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+
+      - name: review_comment_title
+        data_type: text
+        description: "Tiêu đề của bình luận đánh giá do khách hàng viết."
+
+      - name: review_comment_message
+        data_type: text
+        description: "Nội dung chi tiết của bình luận đánh giá."
+
+      - name: review_creation_date
+        data_type: timestamp with time zone
+        description: "Thời gian khách hàng gửi bản đánh giá."
+        tests:
+          - not_null
+
+      - name: review_answer_timestamp
+        data_type: timestamp with time zone
+        description: "Thời gian hệ thống/seller phản hồi lại đánh giá đó."
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."

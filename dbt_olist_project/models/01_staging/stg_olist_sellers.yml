@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: stg_olist_sellers
+    description: "Tầng Silver (Staging) - Thông tin chi tiết về các nhà bán hàng (sellers), khu vực và mã bưu điện xuất phát."
+    columns:
+      - name: seller_id
+        data_type: text
+        description: "Mã định danh duy nhất của nhà bán hàng (Khóa chính của bảng)."
+        tests:
+          - unique
+          - not_null
+
+      - name: seller_zip_code_prefix
+        data_type: text
+        description: "Mã bưu điện 5 chữ số nơi nhà bán hàng đặt kho/trụ sở (đã chuẩn hóa lpad)."
+        tests:
+          - not_null
+
+      - name: seller_city
+        data_type: text
+        description: "Tên thành phố của nhà bán hàng (đã chuẩn hóa initcap)."
+
+      - name: seller_state
+        data_type: text
+        description: "Mã bang Brazil của nhà bán hàng (ví dụ: SP, RJ)."
+        tests:
+          - not_null
+          
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."

@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_olist_order_items
+    description: "Tầng Silver (Staging) - Chi tiết các mặt hàng có trong từng đơn hàng, bao gồm giá sản phẩm và phí vận chuyển."
+    columns:
+      - name: order_id
+        data_type: text
+        description: "Mã định danh đơn hàng (Khóa ngoại trỏ sang bảng orders)."
+        tests:
+          - not_null
+
+      - name: order_item_id
+        data_type: integer
+        description: "Số thứ tự của sản phẩm trong cùng một đơn hàng (Bắt đầu từ 1, 2, 3...)."
+        tests:
+          - not_null
+
+      - name: product_id
+        data_type: text
+        description: "Mã định danh sản phẩm (Khóa ngoại trỏ sang bảng products)."
+        tests:
+          - not_null
+
+      - name: seller_id
+        data_type: text
+        description: "Mã định danh người bán hàng/nhà cung cấp (Khóa ngoại trỏ sang bảng sellers)."
+        tests:
+          - not_null
+
+      - name: shipping_limit_date
+        data_type: timestamp with time zone
+        description: "Hạn chót để người bán giao hàng cho đơn vị vận chuyển."
+        tests:
+          - not_null
+
+      - name: price
+        data_type: numeric
+        description: "Giá tiền của sản phẩm trong mục hàng đó (đã bao gồm đơn vị tiền tệ)."
+        tests:
+          - not_null
+          - expression_is_true:
+              expression: "price >= 0"
+
+      - name: freight_value
+        data_type: numeric
+        description: "Chi phí vận chuyển tính riêng cho sản phẩm đó."
+        tests:
+          - not_null
+          - expression_is_true:
+              expression: "freight_value >= 0"
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."

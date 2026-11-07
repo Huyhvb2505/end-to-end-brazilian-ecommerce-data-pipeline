@@ -9,8 +9,8 @@ cleaned as (
         cast(review_score as integer) as review_score,
         nullif(trim(review_comment_title), '') as review_comment_title,
         nullif(trim(review_comment_message), '') as review_comment_message,
-        cast(review_creation_date as timestamp) as review_creation_date,
-        cast(review_answer_timestamp as timestamp) as review_answer_timestamp,
+        to_timestamp(review_creation_date, 'DD/MM/YYYY HH24:MI') as review_creation_date,
+        to_timestamp(review_answer_timestamp, 'DD/MM/YYYY HH24:MI') as review_answer_timestamp,
         _ingested_at
     from source
 )

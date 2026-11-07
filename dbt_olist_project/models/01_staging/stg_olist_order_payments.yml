@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_olist_order_payments
+    description: ""
+    columns:
+      - name: order_id
+        data_type: text
+        description: "Mã định danh đơn hàng (Khóa ngoại trỏ sang bảng orders)."
+        tests:
+          - not_null
+
+      - name: payment_sequential
+        data_type: integer
+        description: "Thứ tự của phương thức thanh toán trong đơn hàng."
+        tests:
+          - not_null
+
+      - name: payment_type
+        data_type: text
+        description: "Loại hình thanh toán (ví dụ: credit_card, boleto)."
+        tests:
+          - not_null
+
+
+      - name: payment_installments
+        data_type: integer
+        description: "Số lần trả góp của phương thức thanh toán >=1"
+        tests:
+          - not_null
+          - expression_is_true:
+              expression: "payment_installments >= 1"
+
+      - name: payment_value
+        data_type: numeric
+        description: |
+         - Giá trị thanh toán của đơn hàng.  
+         - Có thể bằng 0 vì khách hàng thanh toán = voucher hoặc bị not_defined
+        tests:
+          - not_null
+          - expression_is_true:
+              expression: "payment_value > 0"
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian ghi nhận bản ghi."

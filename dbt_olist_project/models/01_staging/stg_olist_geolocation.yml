@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_olist_geolocation
+    description: "Tầng Silver (Staging) - Chứa thông tin vị trí địa lý, tọa độ vĩ độ/kinh độ theo mã bưu điện Brazil."
+    columns:
+      - name: geolocation_zip_code_prefix
+        data_type: text
+        description: "Mã bưu điện (5 chữ số đầu), dùng làm khóa chính logic sau khi đã gom nhóm (deduplication)."
+        tests:
+          - not_null
+
+      - name: geolocation_lat
+        data_type: numeric
+        description: "Vĩ độ trung bình (latitude) của khu vực mã bưu điện."
+
+      - name: geolocation_lng
+        data_type: numeric
+        description: "Kinh độ trung bình (longitude) của khu vực mã bưu điện."
+
+      - name: geolocation_city
+        data_type: text
+        description: "Tên thành phố tương ứng (đã chuẩn hóa)."
+
+      - name: geolocation_state
+        data_type: text
+        description: "Mã bang Brazil (ví dụ: SP, RJ)."
+        tests:
+          - not_null
+          
+
+      - name: _ingested_at
+        data_type: timestamp without time zone
+        description: "Thời gian dữ liệu thô được nạp vào Bronze layer."
