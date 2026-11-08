@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_olist_order_items
     description: "Tầng Silver (Staging) - Chi tiết các mặt hàng có trong từng đơn hàng, bao gồm giá sản phẩm và phí vận chuyển."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_order_items_dataset'
+          tolerance_percent: 0
     columns:
       - name: order_id
         data_type: text

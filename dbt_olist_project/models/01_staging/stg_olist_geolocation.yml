@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_olist_geolocation
     description: "Tầng Silver (Staging) - Chứa thông tin vị trí địa lý, tọa độ vĩ độ/kinh độ theo mã bưu điện Brazil."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_geolocation_dataset'
+          tolerance_percent: 0
     columns:
       - name: geolocation_zip_code_prefix
         data_type: text

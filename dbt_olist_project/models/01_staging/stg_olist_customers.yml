@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_olist_customers
     description: "Tầng Silver (Staging) - Làm sạch và chuẩn hóa thông tin khách hàng từ Olist dataset."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_customers_dataset'
+          tolerance_percent: 0
     columns:
       - name: customer_id
         data_type: text
@@ -37,3 +42,5 @@ models:
       - name: _ingested_at
         data_type: timestamp without time zone
         description: "Thời gian dữ liệu thô được nạp vào hệ thống Bronze layer."
+
+    
