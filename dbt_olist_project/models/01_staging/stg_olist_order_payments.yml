@@ -2,7 +2,19 @@ version: 2
 
 models:
   - name: stg_olist_order_payments
-    description: ""
+    description: | 
+      - Tầng Silver (Staging) - Chi tiết các phương thức thanh toán của từng đơn hàng, 
+      - bao gồm loại hình thanh toán, số lần trả góp và giá trị thanh toán.
+      - payment_installments
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_order_payments_dataset'
+          tolerance_percent: 0
+      - expression_is_true:
+          expression: "payment_installments >= 1"
+      - expression_is_true:
+          expression: "payment_value >= 0"   
     columns:
       - name: order_id
         data_type: text
@@ -25,11 +37,11 @@ models:
 
       - name: payment_installments
         data_type: integer
-        description: "Số lần trả góp của phương thức thanh toán >=1"
+        description: >
+          Số lần trả góp của phương thức thanh toán >=1. Chuẩn hóa những giao dịch có số lần trả góp = 0 thành 1. 
         tests:
           - not_null
-          - expression_is_true:
-              expression: "payment_installments >= 1"
+          
 
       - name: payment_value
         data_type: numeric
@@ -38,8 +50,7 @@ models:
          - Có thể bằng 0 vì khách hàng thanh toán = voucher hoặc bị not_defined
         tests:
           - not_null
-          - expression_is_true:
-              expression: "payment_value > 0"
+          
 
       - name: _ingested_at
         data_type: timestamp without time zone

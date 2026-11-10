@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_olist_sellers
     description: "Tầng Silver (Staging) - Thông tin chi tiết về các nhà bán hàng (sellers), khu vực và mã bưu điện xuất phát."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_sellers_dataset'
+          tolerance_percent: 0
     columns:
       - name: seller_id
         data_type: text

@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_olist_orders
     description: "Tầng Silver (Staging) - Chứa thông tin tổng quan, trạng thái và các mốc thời gian vòng đời của đơn hàng."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_orders_dataset'
+          tolerance_percent: 0
     columns:
       - name: order_id
         data_type: text

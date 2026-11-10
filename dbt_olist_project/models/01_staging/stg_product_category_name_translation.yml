@@ -3,6 +3,11 @@ version: 2
 models:
   - name: stg_product_category_name_translation
     description: "Tầng Silver (Staging) - Bảng từ điển dịch thuật tên danh mục sản phẩm từ tiếng Bồ Đào Nha sang tiếng Anh."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'product_category_name_translation'
+          tolerance_percent: 0
     columns:
       - name: product_category_name
         data_type: text

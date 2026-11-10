@@ -8,6 +8,10 @@ models:
           raw_source_name: 'raw'
           raw_table_name: 'olist_order_items_dataset'
           tolerance_percent: 0
+      - expression_is_true:
+          expression: "price >= 0"
+      - expression_is_true:
+          expression: "freight_value >= 0"
     columns:
       - name: order_id
         data_type: text
@@ -44,16 +48,14 @@ models:
         description: "Giá tiền của sản phẩm trong mục hàng đó (đã bao gồm đơn vị tiền tệ)."
         tests:
           - not_null
-          - expression_is_true:
-              expression: "price >= 0"
+      
 
       - name: freight_value
         data_type: numeric
         description: "Chi phí vận chuyển tính riêng cho sản phẩm đó."
         tests:
           - not_null
-          - expression_is_true:
-              expression: "freight_value >= 0"
+          
 
       - name: _ingested_at
         data_type: timestamp without time zone

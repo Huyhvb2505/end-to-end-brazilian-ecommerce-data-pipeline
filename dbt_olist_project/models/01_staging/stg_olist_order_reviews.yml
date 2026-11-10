@@ -3,12 +3,16 @@ version: 2
 models:
   - name: stg_olist_order_reviews
     description: "Tầng Silver (Staging) - Thông tin đánh giá, điểm số (1-5 sao) và bình luận phản hồi của khách hàng về đơn hàng."
+    tests:
+      - row_count_match:
+          raw_source_name: 'raw'
+          raw_table_name: 'olist_order_reviews_dataset'
+          tolerance_percent: 0
     columns:
       - name: review_id
         data_type: text
-        description: "Mã định danh duy nhất của bản đánh giá (Khóa chính của bảng)."
+        description: "Mã review của bảng có thể trùng lặp."
         tests:
-          - unique
           - not_null
 
       - name: order_id
