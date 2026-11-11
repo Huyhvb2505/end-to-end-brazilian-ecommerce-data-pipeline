@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: dim_sellers
+    description: "Bảng danh mục người bán, được làm sạch và chuẩn hóa từ dữ liệu Olist."
+    columns:
+      - name: seller_id
+        description: "Mã định danh duy nhất của người bán (Khóa chính)."
+        tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        description: "Mã bưu chính của người bán."
+        tests:
+          - not_null
+      - name: seller_city
+        description: "Thành phố của người bán."
+        tests:
+          - not_null
+      - name: seller_state
+        description: "Tiểu bang của người bán."
+        tests:
+          - not_null

@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: fact_order_items
+    description: "Bảng chi tiết các mặt hàng trong từng đơn hàng, bao gồm giá sản phẩm, phí vận chuyển và tổng giá trị thanh toán của từng item."
+    columns:
+      - name: order_id
+        description: "Mã định danh đơn hàng, liên kết với bảng đơn hàng."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fact_orders')
+              field: order_id
+
+      - name: product_id
+        description: "Mã định danh sản phẩm, liên kết với bảng danh mục sản phẩm (dim_products)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+
+      - name: seller_id
+        description: "Mã định danh nhà bán hàng, liên kết với bảng nhà bán (dim_sellers)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_sellers')
+              field: seller_id
+
+      - name: shipping_limit_date
+        description: "Thời hạn cuối cùng để nhà bán hàng gửi sản phẩm cho đơn vị vận chuyển."
+
+      - name: price
+        description: "Giá niêm yết của sản phẩm trong mặt hàng này."
+        tests:
+          - not_null
+
+      - name: freight_value
+        description: "Chi phí vận chuyển tính riêng cho mặt hàng này."
+        tests:
+          - not_null
+
+      - name: total_item
+        description: "Tổng giá trị của mặt hàng bao gồm giá sản phẩm cộng với phí vận chuyển (price + freight_value)."
+        tests:
+          - not_null

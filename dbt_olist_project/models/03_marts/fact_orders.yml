@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: fact_orders
+    description: "Bảng tổng hợp thông tin đơn hàng kết hợp với các hình thức thanh toán được pivot."
+    columns:
+      - name: order_id
+        description: "Mã định danh duy nhất của đơn hàng (Khóa chính)."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Mã định danh giao dịch của khách hàng cho đơn hàng này."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+
+      - name: order_status
+        description: "Trạng thái hiện tại của đơn hàng (ví dụ: delivered, shipped, canceled)."
+        tests:
+          - not_null
+
+      - name: credit_card
+        description: "Số tiền thanh toán qua thẻ tín dụng (Credit Card) cho đơn hàng."
+        tests:
+          - not_null
+
+      - name: boleto
+        description: "Số tiền thanh toán qua hình thức Boleto cho đơn hàng."
+        tests:
+          - not_null
+
+      - name: debit_card
+        description: "Số tiền thanh toán qua thẻ ghi nợ (Debit Card) cho đơn hàng."
+        tests:
+          - not_null
+
+      - name: voucher
+        description: "Số tiền thanh toán sử dụng Voucher cho đơn hàng."
+        tests:
+          - not_null
+
+      - name: order_date
+        description: "Thời điểm khách hàng đặt đơn hàng."
+
+      - name: approved_date
+        description: "Thời điểm đơn hàng được phê duyệt thanh toán."
+
+      - name: delivered_date
+        description: "Thời điểm thực tế đơn hàng được giao thành công."
+
+      - name: estimated_delivery_date
+        description: "Thời điểm dự kiến giao hàng ban đầu cho khách."

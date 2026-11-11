@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dim_products
+    description: "Bảng danh mục sản phẩm, được làm sạch và chuẩn hóa từ dữ liệu Olist."
+    columns:
+      - name: product_id
+        description: "Mã định danh duy nhất của sản phẩm (Khóa chính)."
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name_english
+        description: "Tên danh mục sản phẩm bằng tiếng Anh."
+        tests:
+          - not_null

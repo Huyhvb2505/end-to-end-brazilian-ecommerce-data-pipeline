@@ -10,7 +10,7 @@ with staging as(
         p.product_height_cm,
         p.product_width_cm
     from {{ ref('stg_olist_products') }} as p
-    join {{ ref('stg_product_category_name_translation') }} as p_eng
+    left join {{ ref('stg_product_category_name_translation') }} as p_eng
         on p.product_category_name = p_eng.product_category_name
 )
 

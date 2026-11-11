@@ -27,5 +27,3 @@ select
     o.delivered_date,
     o.estimated_delivery_date
 from orders o left join payments p on o.order_id = p.order_id
-
-select * from orders

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Bảng danh mục khách hàng, được làm sạch và chuẩn hóa từ dữ liệu Olist."
+    columns:
+      - name: customer_id
+        description: "Mã định danh duy nhất của khách hàng (Khóa chính)."
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: "Mã định danh duy nhất của khách hàng trong hệ thống Olist."
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description: "Mã bưu chính của khách hàng."
+        tests:
+          - not_null
+      - name: customer_city
+        description: "Thành phố của khách hàng."
+        tests:
+          - not_null
+      - name: customer_state
+        description: "Tiểu bang của khách hàng."
+        tests:
+          - not_null
