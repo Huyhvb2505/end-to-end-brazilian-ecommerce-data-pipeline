@@ -11,15 +11,42 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__LOGGING_LEVEL: 'INFO'
+
+    MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+    MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    MINIO_HOST: ${MINIO_HOST}
+    MINIO_API_PORT: ${MINIO_API_PORT}
+    MINIO_BUCKET: ${BUCKET_RAW},${BUCKET_PROCESSED},${BUCKET_MODELS}
+
+
+
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_DB: ${POSTGRES_DB}
+    POSTGRES_HOST: 'postgres-dw'
+    POSTGRES_PORT: ${POSTGRES_PORT}
+
+
+
+
+    PYTHONPATH: "/opt/airflow"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs     # Logs folder by airflow
     - ./scripts:/opt/airflow/scripts
-    - ./olist_dbt:/opt/airflow/olist_dbt
+    - ./config:/opt/airflow/config
+    - ./dbt_olist_project:/opt/airflow/dbt_olist_project
+    - ./data:/opt/airflow/data
+
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     postgres-airflow:
       condition: service_healthy
+    postgres-dw:
+      condition: service_healthy
+    minio:
+      condition: service_started
+    
 
 services:
   # --- MINIO OBJECT STORAGE ---
@@ -69,7 +96,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   postgres-dw:
     image: postgres:16-alpine
     container_name: postgres-dw

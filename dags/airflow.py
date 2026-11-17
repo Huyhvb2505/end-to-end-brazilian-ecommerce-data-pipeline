@@ -1,4 +1,4 @@
-from datetime import datetime, time,timedelta
+from datetime import datetime,timedelta
 from airflow.decorators import dag,task
 from airflow.operators.bash import BashOperator
 from scripts.ingest_minio import run_ingest_pipeline
@@ -8,7 +8,8 @@ from scripts.load_to_raw import run_load_pipeline
 default_args = {
     'owner': 'Huy_De',
     'retries': 3,
-    'retry_delay': timedelta(minutes=2)
+    'retry_delay': timedelta(minutes=2),
+    'execution_timeout': timedelta(hours=1) 
 }
 
 
@@ -16,7 +17,7 @@ default_args = {
     dag_id='brazilian_ecommerce_pipeline',
     default_args=default_args,
     description='End-to-end pipeline process data',
-    schedule_interval='@daily',
+    schedule='@daily',
     start_date=datetime(2026, 11, 15),
     catchup=False
 )
@@ -30,19 +31,47 @@ def brazilian_ecommerce_pipeline():
     @task
     def run_ingestion():
         run_ingest_pipeline() 
-        return "Ingestion complete"
+        
 
     @task
     def run_loading():
         run_load_pipeline()
-        return "Loading complete"
+        
 
-    @task.bash
-    def run_dbt_stg():
-        return "cd /opt/airflow/dbt_olist_project && dbt run --select 01_staging"
-    
+    run_dbt_stg = BashOperator(
+        task_id='run_dbt_stg',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt run --select 01_staging --profiles-dir ./.dbt"
+    )
+
+    test_dbt_stg = BashOperator(
+        task_id='test_dbt_stg',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt test --select 01_staging --profiles-dir ./.dbt"
+    )
+
+    run_dbt_int = BashOperator(
+        task_id='run_dbt_int',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt run --select 02_intermediate --profiles-dir ./.dbt"
+    )
+
+    test_dbt_int = BashOperator(
+        task_id='test_dbt_int',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt test --select 02_intermediate --profiles-dir ./.dbt"
+    )
+
+    run_dbt_marts = BashOperator(
+        task_id='run_dbt_marts',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt run --select 03_marts --profiles-dir ./.dbt"
+    )
+
+    test_dbt_marts = BashOperator(
+        task_id='test_dbt_marts',
+        bash_command="cd /opt/airflow/dbt_olist_project && dbt test --select 03_marts --profiles-dir ./.dbt"
+    )
+
     ingestion_task = run_ingestion()
-    dbt_task = run_dbt()
-    ingestion_task >> dbt_task
+    load_task = run_loading()
     
+
+    ingestion_task >> load_task >> run_dbt_stg >> test_dbt_stg >> run_dbt_int >> test_dbt_int >> run_dbt_marts >> test_dbt_marts
+
 brazilian_ecommerce_pipeline_dag = brazilian_ecommerce_pipeline()

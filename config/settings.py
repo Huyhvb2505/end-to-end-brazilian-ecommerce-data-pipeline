@@ -10,7 +10,6 @@ class Settings:
     # --- Directory Structure ---
     BASE_DIR = BASE_DIR
     RAW_DATA_DIR = BASE_DIR / "data" / "raw"
-    TEMP_DIR = BASE_DIR / "data" / "temp_parquet"
 
     # --- JUPYTER CONFIG ---
     JUPYTER_PORT = int(os.getenv("JUPYTER_PORT", 8888))

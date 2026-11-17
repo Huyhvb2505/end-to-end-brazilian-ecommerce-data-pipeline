@@ -1,0 +1,24 @@
+dbt_olist_project:
+  outputs:
+
+    dev:
+      type: postgres
+      threads: 4
+      host: postgres-dw
+      port: 5432
+      user: de_user
+      pass: de_secure_password_2026
+      dbname: brazilian_ecommerce_dw
+      schema: brazilian
+
+    prod:
+      type: postgres
+      threads: [1 or more]
+      host: [host]
+      port: [port]
+      user: [prod_username]
+      pass: [prod_password]
+      dbname: [dbname]
+      schema: [prod_schema]
+
+  target: dev

@@ -27,7 +27,9 @@ def init_minio_client() -> Minio:
 def process_single_table(table_name: str, minio_client: Minio) -> bool:
     """Xử lý toàn bộ luồng ETL cho 1 bảng cụ thể: CSV  -> MinIO ."""
     csv_file_name = f"{table_name}.csv"
+    logger.info(f"File table is: {csv_file_name}")
     csv_path = settings.RAW_DATA_DIR / csv_file_name
+    logger.info(f"CSV path is : {csv_path}")
     
     # check if file exists
     if not csv_path.exists():
