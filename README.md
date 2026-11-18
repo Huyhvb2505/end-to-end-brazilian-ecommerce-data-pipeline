@@ -1,95 +1,114 @@
-# 🚀 Brazilian E-Commerce End-to-End Data Pipeline (Medallion Architecture)
+# 🚀 Brazilian E-Commerce End-to-End ETL Pipeline 
 
-An end-to-end, production-style Batch ELT Data Engineering Pipeline built on the Brazilian E-Commerce Public Dataset by Olist (100,000+ orders across 9 normalized OLTP tables).
-
-This project implements the Medallion Architecture (Bronze → Silver → Gold) using Python, Apache Airflow, MinIO (S3-Compatible Object Storage), PostgreSQL, dbt Core, Docker, and Power BI to transform raw transactional records into an analytics-ready Star Schema Data Warehouse and executive BI dashboards.
+> A robust, production-grade Data Engineering pipeline built to process, transform, and model the Olist Brazilian E-Commerce dataset (~100k orders) using modern Data Lakehouse & ELT patterns[cite: 5].
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ System Architecture
 
 
-    [9 CSV Olist] 
-     │ (1. Python + Pandas/PyArrow + boto3)
-     ▼
-[Tầng BRONZE — MinIO Data Lake] (Lưu file nén cột .parquet tại s3://olist-bronze/YYYY-MM-DD/)
-     │ (2. Python SQLAlchemy / COPY)
-     ▼
-[PostgreSQL: Schema `raw`] (9 bảng thô nguyên bản từ Parquet nạp vào DB)
-     │ (3. dbt Core: dbt snapshot + dbt run + dbt test)
-     ▼
-[Tầng SILVER — PostgreSQL: Schema `silver_dwh`] (Mô hình Star Schema: 1 Fact + 4 Dims, SCD Type 2, Index/Partition)
-     │ (4. dbt Core: CTEs + Window Functions)
-     ▼
-[Tầng GOLD — PostgreSQL: Schema `gold_mart`] (3 bảng Mart tổng hợp sẵn chỉ số kinh doanh)
-     │ (5. Direct Connection)
-     ▼
-[Power BI Dashboard] (Báo cáo Doanh thu, Giao vận SLA & Phân nhóm RFM)
+The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $\rightarrow$ Gold)**, containerized via **Docker Compose**, orchestrated by **Apache Airflow**, and transformed using **dbt Core** inside a PostgreSQL Data Warehouse[cite: 3, 4, 5].
+
+![Architecture Diagram](docs/architecture_diagram.png)
+
+ 
 
 ## ✨ Tính năng nổi bật
 * **Idempotent Upsert:** Xử lý dữ liệu trùng lặp, đảm bảo không bị nhân bản dữ liệu khi chạy lại pipeline.
 * **Dead-Letter Queue (DLQ):** Tự động cách ly các bản ghi lỗi định dạng để xử lý sau mà không làm sập toàn bộ luồng.
 * **Schema Validation:** Kiểm tra tính hợp lệ của kiểu dữ liệu đầu vào bằng Pydantic/Pandas trước khi lưu trữ.
 
-## 🛠️ Tech stack
-* **Data Lake Storage:** MinIO + Apache Parquet
-* **Orchestration:** Apache Airflow 
-* **Data Warehouse:** PostgreSQL
-* **Data Transformation:** dbt Core
-* **Business Intelligence:** Microsoft Power BI
-* **Containerization:** Docker & Docker Compose
+## 🛠️ Tech Stack & Tools
 
-## 📁 Cấu trúc thư mục
+* **Orchestration:** Apache Airflow (Task scheduling & DAG management)[cite: 5].
+* **Storage (Data Lake):** MinIO (S3-compatible Object Storage for Raw data)[cite: 5].
+* **Database (Data Warehouse):** PostgreSQL[cite: 4, 5].
+* **Transformation & Testing:** dbt Core (SQL-based modular transformations & data quality testing).
+* **Environment:** Docker & Docker Compose (Containerized infrastructure)[cite: 3, 4, 5].
+* **Business Intelligence:** Microsoft Power BI.
+* **Language:** Python.
 
+---
+
+## 📁 Project Structure
+
+```text
+brazilian-ecommerce-pipeline/
 ├── config/
-│   └── settings.py                   # Centralized MinIO (boto3) & PostgreSQL (SQLAlchemy) connection configs
-    └── logger.py                     #
+│   ├── settings.py                   # Centralized connection configs
+│   └── logger.py                     # Standardized logging configuration for ETL scripts & pipeline monitoring
+├── dags/                             # Apache Airflow DAG orchestrating the end-to-end workflow
+│   └── airflow.py                    # Main DAG definition scheduling ingestion, loading, dbt tasks and tests
+├── dashboard/                        # Power BI dashboard files & visualizations connected to `gold_mart`
 ├── data/
 │   └── raw/                          # Raw Olist CSV files downloaded from Kaggle
-    └── temp_parquet/                 # 
+├── dbt_olist_project/                # Step 3: dbt Core project for modular SQL transformations & testing
+│   ├── .dbt/                         # Local dbt profile connection configuration (profiles.yml)
+│   ├── dbt_packages/                 # External dbt packages installed via `dbt deps` (e.g., dbt_utils)
+│   ├── macros/                       # Reusable Jinja SQL functions & custom generic test definitions
+│   ├── dbt_project.yml               # Project configuration, schema routing, and materialization settings
+│   ├── models/
+│   │   ├── 01_staging/               # Raw source definitions (_sources.yml), 1-to-1 standardized staging models & column 
+|   |   |                               tests (stg_olist_*.sql / .yml)
+│   │   ├── 02_intermediate/          # Pre-aggregated payments & translated product lookups (int_order_payments_aggregated, 
+|   |   |                               int_products_english)
+│   │   └── 03_marts/                 # Star Schema dimensions, fact tables & mart-level tests (dim_*, fact_*, schema.yml)
+│   └── tests/                        # Singular SQL data quality tests
+├── docs/                             # Architecture diagrams, Airflow & dbt execution screenshots for documentation
+├── images/                           # Custom Dockerfiles extending base service images with project dependencies
+│   ├── airflow/
+│   │   └── Dockerfile                # Custom Airflow image 
+│   └── jupyter/
+│       └── Dockerfile                # Custom JupyterLab image 
+├── notebooks/                        
 ├── scripts/
 │   └── ingestion/
-│       ├── upload_to_minio.py        # Step 1: Converts raw CSVs to Parquet and uploads to MinIO (Bronze)
-│       └── load_minio_to_postgres.py # Step 2: Reads Parquet from MinIO and loads into Postgres `raw` schema
-├── sql/
-│   └── init_postgres.sql             # Initializes database schemas: `raw`, `silver_dwh`, `gold_mart`
-├── olist_dbt/                        # Step 3: dbt Core project for Silver & Gold transformations
-│   ├── dbt_project.yml
-│   ├── snapshots/                    # SCD Type 2 snapshots (scd_customers.sql, scd_sellers.sql)
-│   └── models/
-│       ├── staging/                  # Source definitions and light column casting
-│       ├── silver_dwh/               # Star Schema models (fact_order_items.sql, dim_*.sql, schema.yml)
-│       └── gold_mart/                # Business Data Marts (mart_daily_sales.sql, mart_delivery_sla.sql,               mart_customer_rfm.sql)
-├── dags/
-│   └── olist_medallion_dag.py        # Step 4: Apache Airflow DAG orchestrating the end-to-end workflow
-├── dashboard/
-│   └── olist_executive_report.pbix   # Step 5: Power BI dashboard connected to `gold_mart`
-├── docs/
-│   └── images/                       # Architecture diagrams, Airflow DAG runs, EXPLAIN ANALYZE & BI screenshots
-├── logs/                             # This directory contains the full history of Airflow logs. 
-     └── pipeline.log                 #  
-├── .env.example                      # Template for environment variables
-├── docker-compose.yml                # Multi-container setup (PostgreSQL, MinIO, Apache Airflow)
-├── requirements.txt                  # Python dependencies (boto3, pandas, pyarrow, sqlalchemy, dbt-postgres)
-└── README.md
+│       ├── ingest_minio.py           # Uploads csvs file to MinIO storage
+│       ├── load_to_raw.py            # Read files from MinIO and loads into Postgres `raw` schema
+│       └── init_postgres.sql         # Initializes raw schema & create tables
+├── .env                              # Local environment variables & credentials 
+├── .env.example                      # Template for required environment variables
+├── docker-compose.yml                # Multi-container orchestration (PostgreSQL, MinIO, Airflow, Jupyter)
+├── Makefile                          # Shortcut CLI commands for Docker setup
+├── README.md                         # Comprehensive project documentation
+└── requirements.txt                  # Python dependencies
 
 
+📊 Data Modeling & Transformation Strategy
+The project implements Dimensional Modeling (Kimball Methodology) inside the PostgreSQL Data Warehouse through three dbt layers:
 
-# Notes:
-     1. Bronze layer
-     Đảm bảo tính lặp lại & An toàn hệ thống (Idempotency):
+     1. Staging Layer (stg_*): Direct views/tables over the raw schema. Handles data type casting, column standardizations (snake_case), and basic null filtering.
 
-     Cấu hình cơ chế ghi đè toàn bộ (if_exists="replace" trên PostgreSQL và overwrite object trên MinIO) giúp pipeline đạt tính Idempotent — cho phép chạy lại script nhiều lần mà không lo bị sinh ra dữ liệu trùng lặp (duplicate data).
+     2. Intermediate Layer (int_*): Modular SQL blocks joining staging models (e.g., combining orders, order items, and payments) to compute intermediate metrics.
 
-     Bổ sung cột metadata hệ thống _ingested_at gắn kèm thời điểm chính xác pipeline thực hiện nạp dữ liệu, hỗ trợ hiệu quả cho việc theo dõi, kiểm toán (audit) và debug lỗi sau này.
+     3. Marts Layer (dim_*, fct_*): Final business-ready star schema:
 
-     MinIO (Parquet Format): Đóng vai trò là Single Source of Truth (Nguồn sự thật tối cao). Dữ liệu thô từ CSV được chuyển đổi sang định dạng cột tối ưu Parquet và đẩy lên MinIO giúp tiết kiệm không gian lưu trữ và tăng tốc độ đọc cho các tầng sau.
+          Dimensions (dim_customers, dim_products, dim_sellers): Contextual attributes for filtering and grouping.
 
-     PostgreSQL (schema raw): Đóng vai trò là Staging Area phục vụ cho việc kết nối trực tiếp bằng SQL hoặc các công cụ chuyển đổi tiếp theo.
-
-     read csv and force all column into string data type(tránh làm mất data) sử dụng dtype=str( ép các cột đều là kiểu text)
+          Facts (fct_orders): Granular transactional metrics (freight value, delivery time, review scores) optimized for BI analytical queries.
 
 
+🧪 Data Quality & Testing
+Data integrity is verified automatically via dbt tests running after model generation:
 
-     2. monitor (logging):
+     Generic tests: unique, not_null, accepted_values, and relationships (foreign key constraints) implemented across all dimension and fact tables.
+
+🚀 Quick Start & Installation
+
+1. Prerequisites
+Docker & Docker Compose installed on your local machine.
+Python 3.10+.
+
+2. Clone the Repository
+git clone [https://github.com/Huyhvb2505/brazilian-ecommerce-pipeline.git](https://github.com/Huyhvb2505/brazilian-ecommerce-pipeline.git)
+cd brazilian-ecommerce-pipeline
+
+3. Configure Environment VariablesCopy the template file and fill in your credentials:Bashcp .env.example .env
+
+4. Spin up InfrastructureLaunch all services (Airflow, PostgreSQL, MinIO) via Docker Compose:Bashdocker-compose up -d
+
+5. Run the PipelineAccess the Apache Airflow UI at http://localhost:8080.Enable and trigger the brazilian_ecommerce_elt DAG.
+Monitor tasks execution: Ingestion $\rightarrow$ Loading $\rightarrow$ dbt Run & Test.📸 Pipeline Execution ProofAirflow DAG Success Run(Chèn ảnh chụp màn hình Airflow DAG chạy xanh mượt vào đây)![Airflow Success](docs/airflow_dag_success.png)dbt Lineage Graph(Chèn ảnh chụp màn hình dbt docs lineage graph vào đây)![dbt Lineage](docs/dbt_lineage.png)
+
+👤 AuthorHoàng Võ Bá Huy — GitHub Profile 
      
