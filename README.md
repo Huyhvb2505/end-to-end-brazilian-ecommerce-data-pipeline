@@ -73,6 +73,7 @@ brazilian-ecommerce-pipeline/
 ├── README.md                         # Comprehensive project documentation
 └── requirements.txt                  # Python dependencies
 
+---
 
 📊 Data Modeling & Transformation Strategy
 The project implements Dimensional Modeling (Kimball Methodology) inside the PostgreSQL Data Warehouse through three dbt layers:
@@ -92,7 +93,7 @@ The project implements Dimensional Modeling (Kimball Methodology) inside the Pos
 Data integrity is verified automatically via dbt tests running after model generation:
 
      Generic tests: unique, not_null, accepted_values, and relationships (foreign key constraints) implemented across all dimension and fact tables.
-
+---
 🚀 Quick Start & Installation
 
 1. Prerequisites
@@ -110,5 +111,6 @@ cd brazilian-ecommerce-pipeline
 5. Run the PipelineAccess the Apache Airflow UI at http://localhost:8080.Enable and trigger the brazilian_ecommerce_elt DAG.
 Monitor tasks execution: Ingestion $\rightarrow$ Loading $\rightarrow$ dbt Run & Test.📸 Pipeline Execution ProofAirflow DAG Success Run(Chèn ảnh chụp màn hình Airflow DAG chạy xanh mượt vào đây)![Airflow Success](docs/airflow_dag_success.png)dbt Lineage Graph(Chèn ảnh chụp màn hình dbt docs lineage graph vào đây)![dbt Lineage](docs/dbt_lineage.png)
 
+---
 👤 AuthorHoàng Võ Bá Huy — GitHub Profile 
      
