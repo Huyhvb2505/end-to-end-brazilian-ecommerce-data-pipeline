@@ -47,7 +47,7 @@ End-to-end verification of the data pipeline execution, data lineage, and busine
 
 ## 📁 Project Structure
 
-```text
+
 brazilian-ecommerce-pipeline/
 ├── config/
 │   ├── settings.py                   # Centralized connection configs
