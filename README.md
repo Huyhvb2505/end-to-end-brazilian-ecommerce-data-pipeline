@@ -11,7 +11,7 @@ The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $
 
 ![Architecture Diagram](docs/architecture_diagram.png)
 
-
+---
 ## 🛠️ Tech Stack & Tools
 
 * **Orchestration:** Apache Airflow (Task scheduling & DAG management)[cite: 5].
@@ -23,7 +23,7 @@ The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $
 * **Language:** Python.
 
 
-
+---
 ## 🖥️ Pipeline Execution & BI Visualization
 
 End-to-end verification of the data pipeline execution, data lineage, and business intelligence reporting:
@@ -41,7 +41,7 @@ End-to-end verification of the data pipeline execution, data lineage, and busine
 ### 3. Power BI Analytics Dashboard *(Coming Soon)*
 * **Source:** Connected directly to PostgreSQL `gold_mart` / `03_marts` schema — Tracking revenue trends, delivery SLA performance, and customer RFM segmentation.
 
----UPDATING...---
+     UPDATING...
 
 ---
 
@@ -109,7 +109,7 @@ Data integrity is verified automatically via dbt tests running after model gener
 
      Generic tests: unique, not_null, accepted_values, and relationships (foreign key constraints) implemented across all dimension and fact tables.
 ---
-🚀 Quick Start & Installation
+## 🚀 Quick Start & Installation
 
 1. Prerequisites
 Docker & Docker Compose installed on your local machine.
