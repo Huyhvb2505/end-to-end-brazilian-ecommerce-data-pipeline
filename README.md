@@ -7,16 +7,10 @@
 ## 🏗️ System Architecture
 
 
-The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $\rightarrow$ Gold)**, containerized via **Docker Compose**, orchestrated by **Apache Airflow**, and transformed using **dbt Core** inside a PostgreSQL Data Warehouse[cite: 3, 4, 5].
+The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $\rightarrow$ Gold)**, containerized via **Docker Compose**, orchestrated by **Apache Airflow**, and transformed using **dbt Core** inside a PostgreSQL Data Warehouse.
 
 ![Architecture Diagram](docs/architecture_diagram.png)
 
- 
-
-## ✨ Tính năng nổi bật
-* **Idempotent Upsert:** Xử lý dữ liệu trùng lặp, đảm bảo không bị nhân bản dữ liệu khi chạy lại pipeline.
-* **Dead-Letter Queue (DLQ):** Tự động cách ly các bản ghi lỗi định dạng để xử lý sau mà không làm sập toàn bộ luồng.
-* **Schema Validation:** Kiểm tra tính hợp lệ của kiểu dữ liệu đầu vào bằng Pydantic/Pandas trước khi lưu trữ.
 
 ## 🛠️ Tech Stack & Tools
 
@@ -27,6 +21,27 @@ The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $
 * **Environment:** Docker & Docker Compose (Containerized infrastructure)[cite: 3, 4, 5].
 * **Business Intelligence:** Microsoft Power BI.
 * **Language:** Python.
+
+
+
+## 🖥️ Pipeline Execution & BI Visualization
+
+End-to-end verification of the data pipeline execution, data lineage, and business intelligence reporting:
+
+### 1. Apache Airflow Orchestration
+* **Interface:** `http://localhost:8080` — Automated daily scheduling and execution monitoring across ingestion, loading, dbt transformations, and data quality tests.
+
+![Airflow DAG Success](docs/airflow_dag_success.png)
+
+### 2. dbt Data Lineage & Documentation
+* **Interface:** `http://localhost:8081` (`dbt docs serve`) — End-to-end dependency graph mapping raw sources through staging and intermediate layers into the final Star Schema marts.
+
+![dbt Lineage Graph](docs/dbt_lineage.png)
+
+### 3. Power BI Analytics Dashboard *(Coming Soon)*
+* **Source:** Connected directly to PostgreSQL `gold_mart` / `03_marts` schema — Tracking revenue trends, delivery SLA performance, and customer RFM segmentation.
+
+---UPDATING...---
 
 ---
 
@@ -42,7 +57,7 @@ brazilian-ecommerce-pipeline/
 ├── dashboard/                        # Power BI dashboard files & visualizations connected to `gold_mart`
 ├── data/
 │   └── raw/                          # Raw Olist CSV files downloaded from Kaggle
-├── dbt_olist_project/                # Step 3: dbt Core project for modular SQL transformations & testing
+├── dbt_olist_project/                # dbt Core project for modular SQL transformations & testing
 │   ├── .dbt/                         # Local dbt profile connection configuration (profiles.yml)
 │   ├── dbt_packages/                 # External dbt packages installed via `dbt deps` (e.g., dbt_utils)
 │   ├── macros/                       # Reusable Jinja SQL functions & custom generic test definitions
