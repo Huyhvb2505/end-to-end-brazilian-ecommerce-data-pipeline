@@ -89,8 +89,44 @@ brazilian-ecommerce-pipeline/
 └── requirements.txt                  # Python dependencies
 ```
 ---
+## 🚀 Getting Started & Execution
 
-📊 Data Modeling & Transformation Strategy
+Follow this step-by-step guide to install prerequisites, set up the environment, and run the end-to-end pipeline locally.
+
+1. Environment Variables & dbt Profile
+     1. Create .env from the template:
+          cp .env.example .env
+     Review .env and update credentials if needed (PostgreSQL user/password, MinIO root credentials, and Airflow admin credentials).
+
+     2. Verify local dbt profiles.yml (for local dbt CLI execution):
+
+     Ensure dbt_olist_project/.dbt/profiles.yml is configured to connect to PostgreSQL on localhost:5432 matching the credentials in your .env file.
+     
+2. Set Up Local Python Environment
+
+5. Build & Start Infrastructure (Docker)
+     Build the custom Docker images (images/airflow, images/jupyter) and spin up all services (PostgreSQL, MinIO, Apache Airflow, JupyterLab):
+
+     docker-compose up -d --build (make up)
+
+7. Generate & View dbt Documentation & Lineage 
+     ```text
+     cd dbt_olist_project
+     dbt deps --profiles-dir ./.dbt
+     dbt docs generate --profiles-dir ./.dbt
+     dbt docs serve --profiles-dir ./.dbt --port 8081
+     ```
+     Open http://localhost:8081 in your browser to explore model descriptions, column tests, and the full Lineage Graph.
+     
+6. Execute the End-to-End Pipeline
+     1. Open the Apache Airflow UI at http://localhost:8080 and log in (default: admin / admin or check .env).
+     2. Locate the brazilian_ecommerce_pipeline DAG, toggle it ON (Unpause), and click Trigger DAG.
+
+7. Start the BI dashboard
+     
+--- 
+## 📊 Data Modeling & Transformation Strategy
+
 The project implements Dimensional Modeling (Kimball Methodology) inside the PostgreSQL Data Warehouse through three dbt layers:
 
      1. Staging Layer (stg_*): Direct views/tables over the raw schema. Handles data type casting, column standardizations (snake_case), and basic null filtering.
@@ -103,29 +139,12 @@ The project implements Dimensional Modeling (Kimball Methodology) inside the Pos
 
           Facts (fct_orders): Granular transactional metrics (freight value, delivery time, review scores) optimized for BI analytical queries.
 
+---
+## 🧪 Data Quality & Testing
 
-🧪 Data Quality & Testing
 Data integrity is verified automatically via dbt tests running after model generation:
 
      Generic tests: unique, not_null, accepted_values, and relationships (foreign key constraints) implemented across all dimension and fact tables.
----
-## 🚀 Quick Start & Installation
-
-1. Prerequisites
-Docker & Docker Compose installed on your local machine.
-Python 3.10+.
-
-2. Clone the Repository
-git clone [https://github.com/Huyhvb2505/brazilian-ecommerce-pipeline.git](https://github.com/Huyhvb2505/brazilian-ecommerce-pipeline.git)
-cd brazilian-ecommerce-pipeline
-
-3. Configure Environment VariablesCopy the template file and fill in your credentials:Bashcp .env.example .env
-
-4. Spin up InfrastructureLaunch all services (Airflow, PostgreSQL, MinIO) via Docker Compose:Bashdocker-compose up -d
-
-5. Run the PipelineAccess the Apache Airflow UI at http://localhost:8080.Enable and trigger the brazilian_ecommerce_elt DAG.
-Monitor tasks execution: Ingestion $\rightarrow$ Loading $\rightarrow$ dbt Run & Test.📸 Pipeline Execution ProofAirflow DAG Success Run(Chèn ảnh chụp màn hình Airflow DAG chạy xanh mượt vào đây)![Airflow Success](docs/airflow_dag_success.png)dbt Lineage Graph(Chèn ảnh chụp màn hình dbt docs lineage graph vào đây)![dbt Lineage](docs/dbt_lineage.png)
-
 ---
 ## 🤝 Connect
 👤 Author: [Hoang Vo Ba Huy](https://www.linkedin.com/in/huy-ho%C3%A0ng-v%C3%B5-b%C3%A1-6bab671a6/) | [GitHub](https://github.com/Huyhvb2505) 
