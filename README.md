@@ -47,7 +47,7 @@ End-to-end verification of the data pipeline execution, data lineage, and busine
 
 ## 📁 Project Structure
 
-
+```text
 brazilian-ecommerce-pipeline/
 ├── config/
 │   ├── settings.py                   # Centralized connection configs
@@ -87,7 +87,7 @@ brazilian-ecommerce-pipeline/
 ├── Makefile                          # Shortcut CLI commands for Docker setup
 ├── README.md                         # Comprehensive project documentation
 └── requirements.txt                  # Python dependencies
-
+```
 ---
 
 📊 Data Modeling & Transformation Strategy
