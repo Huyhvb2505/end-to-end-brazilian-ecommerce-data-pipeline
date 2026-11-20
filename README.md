@@ -1,6 +1,6 @@
 # 🚀 Brazilian E-Commerce End-to-End ETL Pipeline 
 
-> A robust, production-grade Data Engineering pipeline built to process, transform, and model the Olist Brazilian E-Commerce dataset (~100k orders) using modern Data Lakehouse & ELT patterns[cite: 5].
+> A robust, production-grade Data Engineering pipeline built to process, transform, and model the Olist Brazilian E-Commerce dataset (~100k orders) using modern Data Lakehouse & ELT patterns.
 
 ---
 
@@ -14,11 +14,11 @@ The pipeline follows the **Medallion Architecture (Bronze $\rightarrow$ Silver $
 ---
 ## 🛠️ Tech Stack & Tools
 
-* **Orchestration:** Apache Airflow (Task scheduling & DAG management)[cite: 5].
-* **Storage (Data Lake):** MinIO (S3-compatible Object Storage for Raw data)[cite: 5].
+* **Orchestration:** Apache Airflow (Task scheduling & DAG management).
+* **Storage (Data Lake):** MinIO (S3-compatible Object Storage for Raw data).
 * **Database (Data Warehouse):** PostgreSQL[cite: 4, 5].
 * **Transformation & Testing:** dbt Core (SQL-based modular transformations & data quality testing).
-* **Environment:** Docker & Docker Compose (Containerized infrastructure)[cite: 3, 4, 5].
+* **Environment:** Docker & Docker Compose (Containerized infrastructure).
 * **Business Intelligence:** Microsoft Power BI.
 * **Language:** Python.
 
