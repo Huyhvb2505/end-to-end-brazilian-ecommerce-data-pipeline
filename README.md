@@ -106,15 +106,18 @@ Follow this step-by-step guide to install prerequisites, set up the environment,
 
 5. Build & Start Infrastructure (Docker)
      Build the custom Docker images (images/airflow, images/jupyter) and spin up all services (PostgreSQL, MinIO, Apache Airflow, JupyterLab):
-
-     docker-compose up -d --build (make up)
-
+     ```text
+     docker compose build --no-cache 
+     docker compose up -d
+     ```
 7. Generate & View dbt Documentation & Lineage 
      ```text
      cd dbt_olist_project
-     dbt deps --profiles-dir ./.dbt
-     dbt docs generate --profiles-dir ./.dbt
-     dbt docs serve --profiles-dir ./.dbt --port 8081
+     docker compose exec airflow-webserver dbt deps --project-dir /opt/airflow/dbt_olist_project --profiles-dir /opt/airflow/dbt_olist_project/.dbt
+
+     docker compose exec airflow-webserver dbt docs generate --project-dir /opt/airflow/dbt_olist_project --profiles-dir /opt/airflow/dbt_olist_project/.dbt
+
+     docker compose exec airflow-webserver dbt docs serve --project-dir /opt/airflow/dbt_olist_project --profiles-dir /opt/airflow/dbt_olist_project/.dbt --port 8081 --host 0.0.0.0
      ```
      Open http://localhost:8081 in your browser to explore model descriptions, column tests, and the full Lineage Graph.
      
@@ -123,28 +126,21 @@ Follow this step-by-step guide to install prerequisites, set up the environment,
      2. Locate the brazilian_ecommerce_pipeline DAG, toggle it ON (Unpause), and click Trigger DAG.
 
 7. Start the BI dashboard
-     
+     UPDATING...
 --- 
 ## 📊 Data Modeling & Transformation Strategy
 
 The project implements Dimensional Modeling (Kimball Methodology) inside the PostgreSQL Data Warehouse through three dbt layers:
 
-     1. Staging Layer (stg_*): Direct views/tables over the raw schema. Handles data type casting, column standardizations (snake_case), and basic null filtering.
+     1. Staging Layer (stg_*): Direct tables over the raw schema. Handles data type casting, column standardizations and basic null filtering.
 
-     2. Intermediate Layer (int_*): Modular SQL blocks joining staging models (e.g., combining orders, order items, and payments) to compute intermediate metrics.
+     2. Intermediate Layer (int_*): Modular SQL blocks joining staging models  to compute intermediate metrics.
 
      3. Marts Layer (dim_*, fct_*): Final business-ready star schema:
 
           Dimensions (dim_customers, dim_products, dim_sellers): Contextual attributes for filtering and grouping.
 
           Facts (fct_orders): Granular transactional metrics (freight value, delivery time, review scores) optimized for BI analytical queries.
-
----
-## 🧪 Data Quality & Testing
-
-Data integrity is verified automatically via dbt tests running after model generation:
-
-     Generic tests: unique, not_null, accepted_values, and relationships (foreign key constraints) implemented across all dimension and fact tables.
 ---
 ## 🤝 Connect
 👤 Author: [Hoang Vo Ba Huy](https://www.linkedin.com/in/huy-ho%C3%A0ng-v%C3%B5-b%C3%A1-6bab671a6/) | [GitHub](https://github.com/Huyhvb2505) 

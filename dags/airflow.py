@@ -17,7 +17,7 @@ default_args = {
     dag_id='brazilian_ecommerce_pipeline',
     default_args=default_args,
     description='End-to-end pipeline process data',
-    schedule='@daily',
+    schedule=None,
     start_date=datetime(2026, 11, 15),
     catchup=False
 )
